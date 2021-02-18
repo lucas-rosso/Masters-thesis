@@ -34,7 +34,7 @@ cd "$data"
 use SCF_Data
 * ----------------------------------------------------------- *
 
-** Top 1% share and gini coefficient across surveys
+** Top shares and gini coefficient across surveys
 gen wealth_aux = financial_wealth_RA*wgt // to capture weigths 
 
 bys year: egen top_w        = sum(wealth_aux)
@@ -129,14 +129,8 @@ replace Safe_assets_aux = 500 if Safe_assets_aux>=500
 histogram Safe_assets_aux [fw=fwgt], bin(50) $general_style ytitle("Density") ylabel(, format(%9.2fc)) ///
 fcolor(blue%70) lcolor(white) xtitle("Safe Wealth (Thousands)") xlabel(, format(%9.0fc))
 gr export safe_wealth_dist.pdf, replace
-
-* Lorenz curve
-/*
-ssc install lorenz
-lorenz e financial_wealth Risky_assets Safe_assets income
-lorenz graph, over
-*/
 * ------------------------------------
+
 
 
 **************************************************
@@ -149,6 +143,8 @@ legend(order(1 "Top 1% Wealth Share" 2 "Wealth Gini Index") rows(2) position(11)
 gr export w_ineq_evol.pdf, replace
 * ------------------------------------
 
+
+
 ******************************************************
 *** RISKY SHARE ACROSS WEALTH DIST (BASELINE DEF.) ***
 ******************************************************
@@ -156,6 +152,8 @@ twoway (connected risky_share_RA_p FW_percentile_RA if ID_RA == 1, $connected_st
 $general_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(0(0.1)0.6, format(%9.1f))
 gr export baseline_riskyshare.pdf, replace
 * ------------------------------------
+
+
 
 *** RISKY SHARE ACROSS WEALTH DIST (BASELINE DEF.) ***
 /*
@@ -167,6 +165,8 @@ gr export riskyshare_cond_uncond.pdf, replace
 * ------------------------------------
 */
 
+
+
 *************************************************
 *** RISKY SHARE PART. RATE ACROSS WEALTH DIST ***
 *************************************************
@@ -174,6 +174,8 @@ twoway (connected part_Risky_assets_RA_p FW_percentile_RA if ID_RA == 1, $connec
 $general_style xtitle(Wealth Percentile) ytitle(Part. Rate) ylabel(, format(%9.1f))
 gr export baseline_partrisky.pdf, replace
 * ------------------------------------
+
+
 
 *********************************************
 *** RISKY SHARE FOR DIFFERENT DEFINITIONS ***
@@ -197,6 +199,8 @@ $general_style xtitle(Wealth Percentile) ytitle(Part. Rate) ylabel(, format(%9.1
 gr export robustness_part.pdf, replace 
 * ------------------------------------
 
+
+
 *********************************
 *** ASSETS ACROSS WEALTH DIST ***
 *********************************
@@ -208,6 +212,8 @@ if ID_NH_RA == 1, $general_style xtitle(Wealth Percentile) ytitle(Share) legend(
 gr export assets_share.pdf, replace
 * ------------------------------------
 
+
+
 *** OLD SHARES OUT OF RETIREMENT WEALTH ***
 /*
 twoway (connected share_old_p FW_old_acc if ID_old == 1, $connected_style sort(FW_old_acc)), ///
@@ -216,10 +222,13 @@ gr export old_riskyshare.pdf, replace
 */
 * ------------------------------------
 
+
+
 *************************************************
 *** BACK OF THE ENVELOPE RETURN HETEROGENEITY ***
 *************************************************
 
+* estimates from Xavier (2020)
 g r_a = 0.067
 g r_b = 0.021
 
@@ -279,7 +288,10 @@ local `var'_part =  r(mean)
 local `var'_part: di %9.2f ``var'_part'
 }
 
+*****************************
 ***  CREATING LATEX TABLE ***
+*****************************
+
 tex \begin{tabular}{lccccccc} \hline \hline
 tex  & Mean & Sd & P10 & Median & P90 & Part. Rate \\  \midrule 
 * total safe
@@ -333,7 +345,11 @@ tex \end{tabular}
 texdoc close 
 * --------------------------------------------------------------------------------
 
+
+*************************
 *** DEMOGRAPHIC STATS ***
+*************************
+
 local demographic income educ age children marital
 
 texdoc i "demo_stat.tex", replace force
@@ -365,28 +381,33 @@ tex \end{tabular}
 texdoc close
 * --------------------------------------------------------------------------------
 
+************************
 *** INEQUALITY STATS ***
+************************
+
 local wealth_stats top1_share top5_share top10_share middle40_share bottom50_share
 
 texdoc i "wealth_stats.tex", replace force
 
 qui foreach var of varlist `wealth_stats' {
 sum `var'
-local `var'_mean =  r(mean)
-local `var'_mean: di %9.2fc ``var'_mean'
+local `var'_mean =  r(mean)*100
+local `var'_mean: di %9.3fc ``var'_mean'
 }
 
 ***  CREATING LATEX TABLE ***
 tex \begin{tabular}{l*{3}{>{\centering\arraybackslash}m{2.5cm}}} \hline \hline
-tex  Measure     & Value  & Data \\ \midrule
+tex  Measure  & Data \\ \midrule
 tex Top 1\%   & `top1_share_mean' \\
 tex Top 5\%   & `top5_share_mean' \\
 tex Top 10\%  &  `top10_share_mean' \\
-tex Top 10\%  &  `middle40_share_mean' \\
-tex Top 10\%  &  `bottom50_share_mean' \\ \bottomrule
+tex Middle 40\%  &  `middle40_share_mean' \\
+tex Bottom 50\%  &  `bottom50_share_mean' \\ \bottomrule
 tex \end{tabular}
 texdoc close
 * --------------------------------------------------------------------------------
+
+
 
 
 **************************************************************
@@ -401,6 +422,8 @@ qui forv i = 1/10 {
 	mat A[`i',1] = r(mean)
 }
 matrix list A
+
+
 
 
 ********************************************
