@@ -4,7 +4,7 @@
 * Created on: 19/11/2020
 * Purpose: This dofile merges data from the SCF (1998-2019) and creates relevant variables for
 			analysis and calibration.
-* Last Modified on: 19/11/2020
+* Last Modified on: 22/01/2020
 * Last Modified by: LR
 * Edits:
 	[19/11/2020]: Created dofile
@@ -2511,9 +2511,5 @@ qui forval i = 1/100 {
 
 *** SAVING DATA ***
 save SCF_Data.dta, replace
-
-
-
-
 
 
