@@ -1,11 +1,11 @@
-% ---------------------------------------------- %
-%% Two asset Portfolio Allocation Model %%
-% Based on Liquid-Illiquid LCP code (from Benjamin Moll) %
-% Stochastic return on Risky asset
+% ----------------------------------------------------- %
+%% The Portfolio Choice Channel of Wealth Inequality   %%
+% Based on Liquid-Illiquid LCP code (from Ben Moll) %
+% Main Code
 % Author: Lucas Rosso %
-% Date: 18-02-2021 %
+% Date: 16-04-2021 %
 % Extremely Preliminar %
-% ---------------------------------------------- %
+% ----------------------------------------------------- %
 
 clear all; close all; clc;
 
@@ -17,20 +17,20 @@ load('calibration.mat') % internally calibrated parameters
 
 UseNoAdjustmentAsGuess = 1;
 AssumeConcavity = 0; % this is relevant in the part with adjustment
-BilinW = 1; % when all neighboring points of (b',a') are non-adjustment points, use bilinear weights in dividing mass to be rebalanced 
-            % across them in the KF algorithm
+BilinW = 1;          % when all neighboring points of (b',a') are non-adjustment points, use bilinear weights in dividing mass to be rebalanced 
+                     % across them in the KF algorithm
 
 %% PREFERENCES & OTHER PARAMETERS:
 
 s     = 2;                   % risk aversion in CRRA utility
-rho   = 0.053;               % discount rate
-ka    = optimal_params(1);   % adjustment cost 0.1; %
-% --------------------------------------------------------------------------
+rho   = 0.053;               % discount rate (beta = 0.95)
+ka    = optimal_params(1);   % internally calibrated adj. cost
+
 %% ASSETS
 
 % Safe Asset
 I     = 100; 
-bmin  = -1;
+bmin  = -1; % 1 avg. income
 bmax  = 25;
 b     = linspace(bmin,bmax,I)'; % column vector
 db    = b(2)-b(1);
@@ -44,12 +44,12 @@ da    = a(2)-a(1);
 da2 = da^2;
 
 rbPos = 0.02;    % return on safe asset (e.g. checking account)
-rbNeg = 0.08;    % 6 percent wedge as in Kaplan, Moll and Violante (2018)
+rbNeg = 0.08;    % 6 percent wedge as in Kaplan, Moll and Violante (2018, AER)
 
 % Drift and Variance of the stock return
 mu    = 0.06;  
-s2    = 0.18^2; % Gomes and Michaelides (JF, 2005)                   
-% --------------------------------------------------------------------------
+s2    = 0.18^2; % Gomes and Michaelides (2005, JF)                   
+
 %% LABOR INCOME PROCESS
 
 % Poisson shocks:
@@ -109,14 +109,6 @@ dist      = zeros(maxit,1); % hold errors during iteration
 V0(:,:,1) = (1-s)^(-1)*(z(1) + rbPos.*bb).^(1-s)/rho; % assuming u(c) = c^(1 - s)/(1 - s). This is similar to value of "staying put" u(z + rb*b)/rho                                                          
 V0(:,:,2) = (1-s)^(-1)*(z(2) + rbPos.*bb).^(1-s)/rho;
 v         = V0;  
-
-%  tau = 15; % from two_assets_kinked.m, this is justified as: if ra>>rb, impose tax on ra*a at high a, otherwise some households accumulate infinite illiquid wealth
-%            % (not needed if ra is close to - or less than - rb). It implies aDrift = ra*a*(1 - (a/(amax * 0.999))^(tau - 1))
-%  tau0 = mu.*(amax*.999)^(1-tau); % in two_assets_kinked.m the multiplier is 1.33 instead of 0.999. That multiplier makes the tax much less aggressive, as with 
-%                                  % 0.999 the drift of a goes down to slightly negative towards amax, while with 1.33 the drift becomes just slightly concave near amax
-%  T = tau0*a.^tau;
-%  aDrift = mu*a - T;
-% plot(a,aDrift,a,zeros(J,1),a,ra.*a)
 
 aDrift = mu*a;
 diff  = s2*a.^2;
@@ -524,7 +516,7 @@ g(:,:,1) = reshape(g_stacked(1:I*J),I,J);
 g(:,:,2) = reshape(g_stacked(I*J+1:I*J*2),I,J);
 
 fprintf('Made it !!')
-save('DATA') % to avoid going through the iteration again.
+% save('DATA') % to avoid going through the iteration again.
 
 run Make_Figures.m
 
