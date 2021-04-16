@@ -1,6 +1,10 @@
-%% --------------- %%
-     % FIGURES %
-%  ---------------- %
+% ----------------------------------------------------- %
+%% The Portfolio Choice Channel of Wealth Inequality   %%
+% Code to generate and save figures
+% Author: Lucas Rosso %
+% Date: 18-02-2021 %
+% Extremely Preliminar %
+% ----------------------------------------------------- %
 
 % load('DATA_04012021')
 
@@ -95,29 +99,6 @@ print -dpng adjTarget.png
 % print -depsc adjTarget_a.eps
 % -----------------------------------------------
 
-% Figure 3: KF equation
-% figure
-% set(gcf,'PaperPosition',[0 0 15 5])
-% subplot(1,2,1)
-% surf(b,a,g(:,:,1)')
-% xlabel('Safe Wealth (b)','FontSize',11, 'interpreter','latex')
-% ylabel('Risky Wealth (a)','FontSize',11, 'interpreter','latex')
-% title('Stationary Density, Low Income','FontSize',11, 'interpreter','latex')
-% xlim([0 bmax])
-% ylim([0 amax])
-% 
-% subplot(1,2,2)
-% surf(b,a,g(:,:,2)')
-% xlabel('Safe Wealth (b)','FontSize',11, 'interpreter','latex')
-% ylabel('Risky Wealth (a)','FontSize',11, 'interpreter','latex')
-% title('Stationary Density, High Income','FontSize',11, 'interpreter','latex')
-% xlim([0 bmax])
-% ylim([0 amax])
-% 
-% print -dpng distribution.png
-% print -depsc distribution.eps
-% -----------------------------------------------
-
 % Figure: A transition matrix
 figure
 spy(A)
@@ -137,22 +118,6 @@ marg_a(:,2) = sum(g(:,:,2))*db;
 %safe
 marg_b(:,1) = sum(auxi_g(:,:,1))*da; 
 marg_b(:,2) = sum(auxi_g(:,:,2))*da;
-
-% figure 
-% subplot(1,2,1)
-% plot(b,marg_b); grid on, hold on
-% legend('Low income', 'High income','location','northeast')
-% xlabel('Safe Asset ($b$)','Fontsize',12,'interpreter','latex')
-% xlim([0 bmax])
-% 
-% subplot(1,2,2)
-% plot(a,marg_a); grid on, hold on
-% legend('Low income', 'High income','location','northeast')
-% xlabel('Risky Asset ($a$)','Fontsize',12,'interpreter','latex')
-% xlim([0 bmax])
-% hold off
-
-% bar graph
 
 % both, editing xlims
 aux = (a<18)';
@@ -279,6 +244,7 @@ clear aux aux2 new_marginal_a new_marginal_b
 % xlim([-da/2 amax])
 % text(2,0.5,['$\leftarrow Pr(a=0)=' num2str(round(da*marginal_a(1),2)) '$'],'FontSize',14,'interpreter','latex','Color','k');
 % hold off
+
 %% Kappa and the Merton Rule
 
 a_final = aAdj.*adjRegion + aaa.*(adjRegion==0);
@@ -432,7 +398,7 @@ wealth_stats = {'Top 1%', round(top1_share,3)*100; ...
                 'Bottom 50%', round(bottom50_share,3)*100 }
             
 %% avg risky share
-risky_share_data = [0.00185908,0.02011726,0.06025168,0.13573499,0.21601109,0.28422712,0.32045861,0.38150663,0.43721997,0.52562847]
+risky_share_data = [0.00185908,0.02011726,0.06025168,0.13573499,0.21601109,0.28422712,0.32045861,0.38150663,0.43721997,0.52562847];
 
 share_a = min(max(reshape(share_a, I*J,2),0),1); % restricting portfolio to (0,1)
 share_a = mean(share_a')';
