@@ -3,7 +3,7 @@
 * Created by: Lucas Rosso
 * Created on: 23/11/2020
 * Purpose: Use data from the SCF (1998-2019) to document stylized facts from US households
-* Last Modified on: 03/02/2021
+* Last Modified on: 22/03/2021
 * Last Modified by: LR
 * Edits:
 	[23/11/2020]: Created dofile
@@ -11,6 +11,7 @@
 	[15/12/2020]: Computed Top 1% Wealth Share and Gini across surveys
 	[21/01/2021]: New Baseline Definition, including pension wealth (financial_wealth_RA)
 	[03/02/2021]: Exported risky share average to a csv file
+	[22/03/2021]: Edited size of legends, labels and titles for subfigures in main document
 *****************************************************************************************************/
 
 clear all
@@ -71,12 +72,15 @@ to get back to STATA's default type:
 set scheme s2color
 
 computer modern font can be downloaded from https://www.fontsquirrel.com/fonts/computer-modern. The following link:
-https://medium.com/the-stata-guide/stata-graphs-get-those-fonts-right-c38d35625142 explaint how to install the font.
+https://medium.com/the-stata-guide/stata-graphs-get-those-fonts-right-c38d35625142 explains how to install the font.
 Finally edit graph preferences for the specific font (I use "CMU serif") */
  
 * Global macros for figure style
 gl general_style ylabel(, glwidth(vthin) ) xlabel(, glwidth(vthin)) xtitle(, margin(small))
 gl connected_style lwidth(thin) mcolor(%50)
+gl subfigure_style ytitle(, size(medlarge)) xtitle(, size(medlarge)) ylabel(, labsize(medlarge)) xlabel(, labsize(medlarge)) legend(size(medlarge))
+* ------------------------------------
+
 
 * ID for figures 
 bys FW_percentile_H: g ID_pctile_H = _n
@@ -105,29 +109,16 @@ gr export fin_wealth_dist.pdf, replace
 g Risky_assets_aux = Risky_assets_RA/1000
 replace Risky_assets_aux = 500 if Risky_assets_aux>=500
 
-histogram Risky_assets_aux [fw=fwgt], bin(50) $general_style ytitle("Density") ylabel(, format(%9.2fc)) ///
+histogram Risky_assets_aux [fw=fwgt], bin(50) $general_style $subfigure_style ytitle("Density") ylabel(, format(%9.2fc)) ///
 fcolor(red%70) lcolor(white) xtitle("Risky Wealth (Thousands)") xlabel(, format(%9.0fc))
 gr export risky_wealth_dist.pdf, replace
-
-/*
-* risky wealth below/above median income
-xtile income_pctile = income [aw=wgt], nquantiles(100)  
-
-* below
-histogram Risky_assets_aux [fw=fwgt] if income_pctile<=50, bin(50) $general_style ytitle("Density") ylabel(, format(%9.2fc)) ///
-fcolor(red%70) lcolor(white) xtitle("Risky Wealth (Thousands)") xlabel(, format(%9.0fc))
-
-* above
-histogram Risky_assets_aux [fw=fwgt] if income_pctile>50, bin(50) $general_style ytitle("Density") ylabel(, format(%9.2fc)) ///
-fcolor(red%70) lcolor(white) xtitle("Risky Wealth (Thousands)") xlabel(, format(%9.0fc))
-*/
 
 * safe wealth
 g Safe_assets_aux = Safe_assets_RA/1000
 replace Safe_assets_aux = 500 if Safe_assets_aux>=500
 
-histogram Safe_assets_aux [fw=fwgt], bin(50) $general_style ytitle("Density") ylabel(, format(%9.2fc)) ///
-fcolor(blue%70) lcolor(white) xtitle("Safe Wealth (Thousands)") xlabel(, format(%9.0fc))
+histogram Safe_assets_aux [fw=fwgt], bin(50) $general_style $subfigure_style ytitle("Density") ///
+ylabel(, format(%9.2fc)) fcolor(blue%70) lcolor(white) xtitle("Safe Wealth (Thousands)") xlabel(, format(%9.0fc))
 gr export safe_wealth_dist.pdf, replace
 * ------------------------------------
 
@@ -148,30 +139,18 @@ gr export w_ineq_evol.pdf, replace
 ******************************************************
 *** RISKY SHARE ACROSS WEALTH DIST (BASELINE DEF.) ***
 ******************************************************
-twoway (connected risky_share_RA_p FW_percentile_RA if ID_RA == 1, $connected_style sort(FW_percentile_RA)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(0(0.1)0.6, format(%9.1f))
+twoway (connected risky_share_RA_p FW_percentile_RA if ID_RA == 1, $connected_style $subfigure_style ///
+sort(FW_percentile_RA)), $general_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(0(0.1)0.6, format(%9.1f))
 gr export baseline_riskyshare.pdf, replace
 * ------------------------------------
-
-
-
-*** RISKY SHARE ACROSS WEALTH DIST (BASELINE DEF.) ***
-/*
-twoway (connected risky_share_p FW_percentile if ID_pctile == 1, $connected_style sort(FW_percentile)) ///
-(connected cond_risky_share_p FW_percentile if ID_pctile == 1 & FW_percentile>20 , $connected_style sort(FW_percentile)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(0(0.1)0.6, format(%9.1f)) legend(order(1 ///
-"Unconditional" 2 "Conditional") rows(2) region(fcolor(white)) position(11) ring(0))
-gr export riskyshare_cond_uncond.pdf, replace
-* ------------------------------------
-*/
 
 
 
 *************************************************
 *** RISKY SHARE PART. RATE ACROSS WEALTH DIST ***
 *************************************************
-twoway (connected part_Risky_assets_RA_p FW_percentile_RA if ID_RA == 1, $connected_style sort(FW_percentile_RA)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Part. Rate) ylabel(, format(%9.1f))
+twoway (connected part_Risky_assets_RA_p FW_percentile_RA if ID_RA == 1, $connected_style $subfigure_style /// 
+sort(FW_percentile_RA)), $general_style xtitle(Wealth Percentile) ytitle(Part. Rate) ylabel(, format(%9.1f))
 gr export baseline_partrisky.pdf, replace
 * ------------------------------------
 
@@ -183,7 +162,7 @@ gr export baseline_partrisky.pdf, replace
 twoway (connected risky_share_RA_p FW_percentile_RA if ID_RA == 1, $connected_style sort(FW_percentile_RA)) ///
 (connected risky_share_p FW_percentile if ID_pctile == 1, $connected_style sort(FW_percentile)) ///
 (connected risky_share_NH_RA_p FW_percentile_NH_RA if ID_NH_RA == 1, $connected_style sort(FW_percentile_NH_RA)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(, format(%9.1f)) legend(order(1 ///
+$general_style $subfigure_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(, format(%9.1f)) legend(order(1 ///
 "Baseline" 2 "Exc. RA" 3 "Inc. Housing") rows(3) region(fcolor(white)) position(11) ring(0))
 gr export robustness_share.pdf, replace 
 * ------------------------------------
@@ -194,7 +173,7 @@ gr export robustness_share.pdf, replace
 twoway (connected part_Risky_assets_RA_p FW_percentile_RA if ID_RA == 1, $connected_style sort(FW_percentile_RA)) ///
 (connected part_Risky_assets_p FW_percentile if ID_pctile == 1, $connected_style sort(FW_percentile)) ///
 (connected part_Risky_assets_houseNH_RA_p FW_percentile_NH_RA if ID_NH_RA == 1, $connected_style sort(FW_percentile_NH_RA)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Part. Rate) ylabel(, format(%9.1f)) legend(order(1 ///
+$general_style $subfigure_style xtitle(Wealth Percentile) ytitle(Part. Rate) ylabel(, format(%9.1f)) legend(order(1 ///
 "Baseline" 2 "Exc. RA" 3 "Inc. Housing") rows(3) region(fcolor(white)) position(5) ring(0))
 gr export robustness_part.pdf, replace 
 * ------------------------------------
@@ -210,16 +189,6 @@ twoway (connected house_share_p FW_percentile_NH_RA, $connected_style sort(FW_pe
 if ID_NH_RA == 1, $general_style xtitle(Wealth Percentile) ytitle(Share) legend(order(1 ///
 "Housing (net worth)" 2 "Risky" 3 "Ret. Accounts") rows(3) region(fcolor(white)) position(11) ring(0)) ylabel(, format(%9.1f))
 gr export assets_share.pdf, replace
-* ------------------------------------
-
-
-
-*** OLD SHARES OUT OF RETIREMENT WEALTH ***
-/*
-twoway (connected share_old_p FW_old_acc if ID_old == 1, $connected_style sort(FW_old_acc)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(0(0.1)0.6, format(%9.1f))
-gr export old_riskyshare.pdf, replace
-*/
 * ------------------------------------
 
 
@@ -451,7 +420,7 @@ replace tag_educ = 2 if tag_educ==1 & educ==1
 
 twoway (connected risky_share_c FW_percentile_RA if tag_educ == 2, $connected_style sort(FW_percentile_RA)) ///
 (connected risky_share_nc FW_percentile_RA if tag_educ == 1, $connected_style sort(FW_percentile_RA)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(, format(%9.1f)) ///
+$general_style $subfigure_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(, format(%9.1f)) ///
 legend(order(1 "College" 2 "No College") rows(2) position(11) ring(0))
 gr export educ_robustness.pdf, replace
 
@@ -475,24 +444,11 @@ replace id_homeowner = id_homeowner + 1 if owner == 1 & id_homeowner==1
 sort FW_percentile_RA owner
 twoway (connected risky_share_owner_p FW_percentile_RA if id_homeowner == 2, $connected_style ) ///
 (connected risky_share_noowner_p FW_percentile_RA if id_homeowner == 1, $connected_style ), ///
-$general_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(0(0.1)0.6, format(%9.1f)) ///
+$general_style $subfigure_style xtitle(Wealth Percentile) ytitle(Risky Share) ylabel(0(0.1)0.6, format(%9.1f)) ///
 legend(order(1 "Homeowners" 2 "Renters") rows(2) region(fcolor(white)) position(11) ring(0))
 gr export homeowner_renter_rs.pdf, replace
 * ------------------------------------
 
-**************************
-*** MEDIAN RISKY SHARE ***
-**************************
-/*
-g risky_share_m=.
-qui forval i = 1/100 {
-    sum risky_share_RA [aw=wgt] if FW_percentile_RA == `i', detail
-	replace risky_share_m = r(p50) if FW_percentile_RA == `i'
-}
-
-twoway (connected risky_share_m FW_percentile_RA if ID_RA == 1, $connected_style sort(FW_percentile_RA)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Median Risky Share) ylabel(0(0.1)0.6, format(%9.1f)) 
-*/
 
 ***************************
 *** VOLATILITY IN SHARE ***
@@ -536,19 +492,4 @@ coefplot reg1, drop(*.educ *.owner income *.marital *.male children age4 age3 ag
 xlabel(4 "10" 14 "20" 24 "30" 34 "40" 44 "50" 54 "60" 64 "70" 74 "80" 84 "90" 94 "100", grid) /// 
 $general_style legend(off) xtitle(Wealth Percentile) ytitle(Coefficient) ylabel(0(0.1)0.6, format(%9.1f))
 gr export coefplot_riskyshare.pdf, replace
-
-* part rate
-/*
-probit part_Risky_assets i.FW_percentile i.educ income age3 age2 age i.year i.male children i.marital [fw=fwgt]
-
-predict part_hat
-
-g part_hat_p =.
-qui forval i = 1/100 {
-    sum part_hat [aw=wgt] if FW_percentile == `i'
-	replace part_hat_p = r(mean) if FW_percentile == `i'
-}
-
-twoway (connected part_hat_p FW_percentile if ID_pctile == 1, $connected_style sort(FW_percentile)), ///
-$general_style xtitle(Wealth Percentile) ytitle(Predicted Part. Rate) ylabel(, format(%9.1f))
 
